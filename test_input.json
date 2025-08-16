@@ -1,7 +1,6 @@
 {
   "input": {
-    "question": "What are the top 5 products by total revenue in 2024?",
-    "schema": "CREATE TABLE orders(order_id INT, product_id INT, price NUMERIC, qty INT, created_at DATE);\nCREATE TABLE products(id INT, name TEXT);",
-    "max_new_tokens": 200
+    "question": "Find the top 5 items semantically similar to 'oxygen concentrator'.",
+    "temperature": 0.1
   }
 }
