@@ -1,17 +1,32 @@
-import runpod
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import os
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
 
-# Load model + tokenizer once per worker
-MODEL_PATH = "/runpod-volume/sqlcoder-7b-2"  # adjust if needed
+# Hugging Face authentication (token needs to be set in environment)
+HF_TOKEN = os.environ.get("HF_TOKEN")
+
+# Base model (already in your RunPod volume)
+MODEL_PATH = "/runpod-volume/sqlcoder-7b-2"
+
+# LoRA weights from your Hugging Face private repo
+LORA_REPO = "Rohit1993/sqlcoder-lora"
+
 print("Loading SQLCoder model...")
-tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-model = AutoModelForCausalLM.from_pretrained(
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_auth_token=HF_TOKEN)
+
+# Load base model
+base_model = AutoModelForCausalLM.from_pretrained(
     MODEL_PATH,
     device_map="auto",
-    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+    use_auth_token=HF_TOKEN
 )
-print("Model loaded.")
+
+# Apply LoRA
+model = PeftModel.from_pretrained(base_model, LORA_REPO, use_auth_token=HF_TOKEN)
+
+print("Base model + LoRA weights loaded successfully.")
 
 ENRICHED_SCHEMA = """
 Table: inventory_snapshots
@@ -22,7 +37,7 @@ Columns:
 - approx (text) → approximate quantity or measurement
 - description (text) → item description. Supports:
     • Fuzzy search with trigram similarity: description % 'term'
-    • Similarity scoring: similarity(description, 'term') > 0.2
+    • Similarity scoring: similarity(description, 'term') > 0.1
     • Partial match: description ILIKE '%term%'
 - prediction_date (timestamptz) → timestamp of the snapshot
 - embedding (vector[1536]) → semantic embedding for similarity search.
