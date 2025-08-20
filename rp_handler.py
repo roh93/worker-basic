@@ -1,4 +1,5 @@
 import os
+import runpod
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
