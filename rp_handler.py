@@ -7,7 +7,7 @@ from peft import PeftModel
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
 # Base model (already in your RunPod volume)
-MODEL_PATH = "/runpod-volume/sqlcoder-7b-2"
+MODEL_PATH = "defog/sqlcoder-7b-2"
 
 # LoRA weights from your Hugging Face private repo
 LORA_REPO = "Rohit1993/sqlcoder-lora"
